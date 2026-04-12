@@ -76,7 +76,6 @@
 
         .solution-box { background: rgba(16, 185, 129, 0.05); border-right: 4px solid var(--secondary); padding: 15px; border-radius: 10px; margin-top: 15px; line-height: 1.6; }
 
-        /* تنسيقات معرض الصور المتعددة */
         .image-gallery { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 10px; margin-top: 15px; }
         .gallery-item { flex: 0 0 85%; display: flex; flex-direction: column; }
         .ticket-image { width: 100%; height: 200px; object-fit: cover; border-radius: 10px; border: 1px solid var(--border); }
@@ -155,9 +154,9 @@
                     </div>
                     
                     <div class="input-group" id="imageDiv">
-                        <label>إرفاق صور توضح المشكلة (يمكنك اختيار حتى 3 صور)</label>
+                        <label>إرفاق صور توضح المشكلة (يمكنك تحديد حتى 3 صور معاً)</label>
                         <input type="file" id="imageInput" accept="image/*" multiple>
-                        <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 5px; margin-bottom: 0;">يفضل اختيار صور واضحة وبحجم مناسب.</p>
+                        <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 5px; margin-bottom: 0;">نصيحة: عند الاختيار، قم بتحديد عدة صور معاً.</p>
                     </div>
                     
                     <button type="submit" class="btn-submit" id="submitBtn">إرسال التقرير 🚀</button>
@@ -188,12 +187,12 @@
     <footer class="page-footer">إعداد معلمي تقنية المعلومات بمدرسة محمد بن سليمان الغافري</footer>
 
     <script>
-        // ======= ضع الرابط الجديد الخاص بك هنا =======
-        const scriptURL = 'https://script.google.com/macros/s/AKfycbw8u-vZ8xXCUO7sRde0VCCX92iVU5TAMNdsUUQ09DbRCnE98qnOUz-H_rWH6T9JD1fb/exec'; 
-        // =============================================
+        // ======= 🔴 ضع الرابط الجديد الخاص بك هنا 🔴 =======
+        const scriptURL = 'https://script.google.com/macros/s/AKfycbx_DVBvF0-7316DmEUuUB0LP0_XOIo3vFptKkCq66DLL-9plHvBdNDt32mpMaGiLjnB/exec'; 
+        // ===================================================
         
         let feedbackData = [];
-        let base64ImagesArray = []; // تحويلها لمصفوفة لدعم الصور المتعددة
+        let base64ImagesArray = []; 
 
         function toggleDarkMode() {
             document.body.classList.toggle('dark-mode');
@@ -216,18 +215,36 @@
             document.getElementById('imageDiv').style.display = val === 'no' ? 'block' : 'none';
         }
 
-        // كود معالجة الصور المتعددة
+        // كود معالجة الصور المتعددة مع إظهار رسالة تأكيد للطالب
         document.getElementById('imageInput').addEventListener('change', async function(e) {
             const files = Array.from(e.target.files);
             base64ImagesArray = [];
             
-            if(files.length > 3) {
-                alert('الرجاء اختيار 3 صور كحد أقصى لتسهيل عملية الإرسال.');
-                this.value = ''; // تفريغ الحقل
+            // إنشاء مساحة لرسالة التأكيد
+            let msgDiv = document.getElementById('fileMsg');
+            if (!msgDiv) {
+                msgDiv = document.createElement('div');
+                msgDiv.id = 'fileMsg';
+                msgDiv.style.cssText = 'margin-top: 10px; font-size: 0.95rem; font-weight: bold; color: var(--primary); background: rgba(2, 132, 199, 0.1); padding: 10px; border-radius: 8px;';
+                this.parentNode.appendChild(msgDiv);
+            }
+
+            if(files.length === 0) {
+                msgDiv.style.display = 'none';
                 return;
             }
 
-            // قراءة كل الملفات وتحويلها
+            if(files.length > 3) {
+                alert('الرجاء اختيار 3 صور كحد أقصى لتسهيل عملية الإرسال.');
+                this.value = ''; 
+                msgDiv.style.display = 'none';
+                return;
+            }
+
+            msgDiv.style.display = 'block';
+            msgDiv.innerHTML = `✅ تم تحديد (${files.length}) صورة بنجاح للاستعداد لرفعها.`;
+
+            // قراءة وتحويل جميع الصور المختارة
             base64ImagesArray = await Promise.all(files.map(file => {
                 return new Promise(resolve => {
                     const reader = new FileReader();
@@ -240,7 +257,7 @@
         document.getElementById('supportForm').addEventListener('submit', e => {
             e.preventDefault();
             const btn = document.getElementById('submitBtn');
-            btn.innerText = 'جاري الإرسال والمعالجة... ⏳';
+            btn.innerText = 'جاري المعالجة وإرسال البيانات... ⏳';
             btn.disabled = true;
 
             const payload = new URLSearchParams();
@@ -250,7 +267,7 @@
             payload.append('hasSolution', document.getElementById('hasSolution').value === 'yes' ? 'تم الحل' : 'بانتظار الحل');
             payload.append('solution', document.getElementById('hasSolution').value === 'yes' ? document.getElementById('solution').value : '');
             
-            // إرسال مصفوفة الصور بدلاً من صورة واحدة
+            // إرسال المصفوفة
             if (document.getElementById('hasSolution').value === 'no' && base64ImagesArray.length > 0) {
                 payload.append('images', JSON.stringify(base64ImagesArray));
             } else {
@@ -262,6 +279,8 @@
                     alert('تم الإرسال بنجاح! شكراً لمشاركتك.');
                     document.getElementById('supportForm').reset();
                     base64ImagesArray = [];
+                    const msgDiv = document.getElementById('fileMsg');
+                    if(msgDiv) msgDiv.style.display = 'none';
                     toggleFields();
                     switchView('board');
                     btn.innerText = 'إرسال التقرير 🚀';
@@ -300,7 +319,7 @@
             }
 
             container.innerHTML = data.reverse().map(item => {
-                // تجميع الصور في معرض إذا وجدت
+                // تجميع الصور في معرض
                 let imagesGalleryHtml = '';
                 if (item.images && item.images.length > 0) {
                     imagesGalleryHtml = '<div class="image-gallery">';
