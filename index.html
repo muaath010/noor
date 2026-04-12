@@ -117,20 +117,31 @@
             </div>
 
             <div class="form-section">
-                <h2>📝 شارك مشكلتك أو حلك التقني</h2>
+                <h2>شارك مشكلتك مع منصة نور</h2>
                 <form id="supportForm">
                     <div class="row">
                         <div class="input-group">
                             <label>الاسم الثنائي</label>
                             <input type="text" id="name" required placeholder="مثال: أحمد محمد">
                         </div>
+                        
                         <div class="input-group">
                             <label>الصف الدراسي</label>
-                            <select id="grade" required>
+                            <select id="mainGrade" required onchange="updateSectionDropdown()">
                                 <option value="">اختر الصف...</option>
-                                <option value="الأول المتوسط">الأول المتوسط</option>
-                                <option value="الثاني المتوسط">الثاني المتوسط</option>
-                                <option value="الثالث المتوسط">الثالث المتوسط</option>
+                                <option value="الخامس">الخامس</option>
+                                <option value="السادس">السادس</option>
+                                <option value="السابع">السابع</option>
+                                <option value="الثامن">الثامن</option>
+                                <option value="التاسع">التاسع</option>
+                                <option value="العاشر">العاشر</option>
+                            </select>
+                        </div>
+
+                        <div class="input-group">
+                            <label>الشعبة</label>
+                            <select id="sectionGrade" required disabled>
+                                <option value="">اختر الصف أولاً...</option>
                             </select>
                         </div>
                     </div>
@@ -188,11 +199,46 @@
 
     <script>
         // ======= 🔴 ضع الرابط الجديد الخاص بك هنا 🔴 =======
-        const scriptURL = 'https://script.google.com/macros/s/AKfycbx_DVBvF0-7316DmEUuUB0LP0_XOIo3vFptKkCq66DLL-9plHvBdNDt32mpMaGiLjnB/exec'; 
+        const scriptURL = 'https://script.google.com/macros/s/AKfycbykL7Fp1-9lRY8eHGUM6eZnWgZufGgmRJwt_yGhWd7WQSXYQAS1_WgvzkMmWKRZGs-Y/exec'; 
         // ===================================================
         
         let feedbackData = [];
         let base64ImagesArray = []; 
+
+        // ----- كود الصفوف والشعب الجديد -----
+        const gradesData = {
+            "الخامس": 6,
+            "السادس": 5,
+            "السابع": 4,
+            "الثامن": 4,
+            "التاسع": 4,
+            "العاشر": 4
+        };
+
+        function updateSectionDropdown() {
+            const mainGrade = document.getElementById('mainGrade').value;
+            const sectionDropdown = document.getElementById('sectionGrade');
+            
+            // تفريغ قائمة الشعب أولاً
+            sectionDropdown.innerHTML = '<option value="">اختر الشعبة...</option>';
+            
+            if (mainGrade && gradesData[mainGrade]) {
+                sectionDropdown.disabled = false;
+                const sectionsCount = gradesData[mainGrade];
+                
+                // إضافة الشعب حسب العدد المحدد لكل صف
+                for (let i = 1; i <= sectionsCount; i++) {
+                    const option = document.createElement('option');
+                    option.value = i;
+                    option.text = `الشعبة ${i}`;
+                    sectionDropdown.appendChild(option);
+                }
+            } else {
+                sectionDropdown.disabled = true;
+                sectionDropdown.innerHTML = '<option value="">اختر الصف أولاً...</option>';
+            }
+        }
+        // -------------------------------------
 
         function toggleDarkMode() {
             document.body.classList.toggle('dark-mode');
@@ -215,12 +261,10 @@
             document.getElementById('imageDiv').style.display = val === 'no' ? 'block' : 'none';
         }
 
-        // كود معالجة الصور المتعددة مع إظهار رسالة تأكيد للطالب
         document.getElementById('imageInput').addEventListener('change', async function(e) {
             const files = Array.from(e.target.files);
             base64ImagesArray = [];
             
-            // إنشاء مساحة لرسالة التأكيد
             let msgDiv = document.getElementById('fileMsg');
             if (!msgDiv) {
                 msgDiv = document.createElement('div');
@@ -244,7 +288,6 @@
             msgDiv.style.display = 'block';
             msgDiv.innerHTML = `✅ تم تحديد (${files.length}) صورة بنجاح للاستعداد لرفعها.`;
 
-            // قراءة وتحويل جميع الصور المختارة
             base64ImagesArray = await Promise.all(files.map(file => {
                 return new Promise(resolve => {
                     const reader = new FileReader();
@@ -260,14 +303,16 @@
             btn.innerText = 'جاري المعالجة وإرسال البيانات... ⏳';
             btn.disabled = true;
 
+            // دمج الصف والشعبة في حقل واحد قبل الإرسال لجوجل شيت
+            const fullGrade = `${document.getElementById('mainGrade').value} / شعبة ${document.getElementById('sectionGrade').value}`;
+
             const payload = new URLSearchParams();
             payload.append('name', document.getElementById('name').value);
-            payload.append('grade', document.getElementById('grade').value);
+            payload.append('grade', fullGrade);
             payload.append('problem', document.getElementById('problem').value);
             payload.append('hasSolution', document.getElementById('hasSolution').value === 'yes' ? 'تم الحل' : 'بانتظار الحل');
             payload.append('solution', document.getElementById('hasSolution').value === 'yes' ? document.getElementById('solution').value : '');
             
-            // إرسال المصفوفة
             if (document.getElementById('hasSolution').value === 'no' && base64ImagesArray.length > 0) {
                 payload.append('images', JSON.stringify(base64ImagesArray));
             } else {
@@ -278,16 +323,17 @@
                 .then(() => {
                     alert('تم الإرسال بنجاح! شكراً لمشاركتك.');
                     document.getElementById('supportForm').reset();
+                    document.getElementById('sectionGrade').disabled = true;
                     base64ImagesArray = [];
                     const msgDiv = document.getElementById('fileMsg');
                     if(msgDiv) msgDiv.style.display = 'none';
                     toggleFields();
                     switchView('board');
-                    btn.innerText = 'إرسال التقرير 🚀';
+                    btn.innerText = 'إرسال التقرير ';
                     btn.disabled = false;
                 }).catch(() => {
                     alert('حدث خطأ في الاتصال، يرجى المحاولة لاحقاً.');
-                    btn.innerText = 'إرسال التقرير 🚀';
+                    btn.innerText = 'إرسال التقرير ';
                     btn.disabled = false;
                 });
         });
@@ -319,7 +365,6 @@
             }
 
             container.innerHTML = data.reverse().map(item => {
-                // تجميع الصور في معرض
                 let imagesGalleryHtml = '';
                 if (item.images && item.images.length > 0) {
                     imagesGalleryHtml = '<div class="image-gallery">';
@@ -339,10 +384,10 @@
                         ${item.hasSolution === 'تم الحل' ? '✅ تم الحل' : '⏳ بانتظار الحل'}
                     </span>
                     <div style="font-weight:800; color:var(--primary); font-size: 1.1rem;">👤 ${item.name}</div>
-                    <div style="font-size:0.9rem; color:var(--text-muted); margin-bottom:15px">🏫 الصف: ${item.grade}</div>
+                    <div style="font-size:0.9rem; color:var(--text-muted); margin-bottom:15px"> ${item.grade}</div>
                     <div style="margin-bottom:10px; flex-grow: 1; line-height: 1.6;"><strong>المشكلة:</strong> ${item.problem}</div>
                     
-                    ${item.solution ? `<div class="solution-box"><strong>💡 حل الطالب:</strong><br>${item.solution}</div>` : ''}
+                    ${item.solution ? `<div class="solution-box"><strong>حل الطالب:</strong><br>${item.solution}</div>` : ''}
                     
                     ${imagesGalleryHtml}
                 </div>
