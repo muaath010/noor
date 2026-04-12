@@ -3,34 +3,45 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>دعم منصة نور | مشاركة المشاكل والحلول</title>
+    <title>منصة دعم نور | مدرسة محمد بن سليمان الغافري</title>
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
             --primary: #0284c7; 
             --secondary: #10b981;
             --danger: #ef4444;
-            --dark: #0f172a;
-            --bg: #f8fafc;
+            --warning: #f59e0b;
+            --dark-bg: #0f172a;
+            --light-bg: #f8fafc;
             --card-bg: #ffffff;
             --text-main: #334155;
             --text-muted: #64748b;
+            --border: #e2e8f0;
+        }
+
+        /* تنسيقات الوضع الليلي */
+        body.dark-mode {
+            --light-bg: #020617;
+            --card-bg: #1e293b;
+            --text-main: #f1f5f9;
+            --text-muted: #94a3b8;
+            --border: #334155;
         }
 
         body {
             font-family: 'Tajawal', sans-serif;
-            background: var(--bg);
+            background: var(--light-bg);
             margin: 0;
             padding: 0;
             color: var(--text-main);
+            transition: background 0.3s, color 0.3s;
             display: flex;
             flex-direction: column;
             min-height: 100vh;
         }
 
-        /* شريط التنقل العلوي */
         header {
-            background: white;
+            background: var(--card-bg);
             box-shadow: 0 2px 10px rgba(0,0,0,0.05);
             padding: 15px 20px;
             display: flex;
@@ -38,368 +49,281 @@
             align-items: center;
             position: sticky;
             top: 0;
-            z-index: 100;
+            z-index: 1000;
         }
 
-        .header-title {
-            font-size: 1.5rem;
-            font-weight: 800;
-            color: var(--primary);
-            margin: 0;
-        }
-
-        .nav-buttons {
-            display: flex;
-            gap: 10px;
-        }
-
-        .btn-nav {
-            padding: 8px 16px;
-            border-radius: 8px;
-            font-weight: 700;
-            cursor: pointer;
-            border: none;
-            transition: 0.3s;
-            font-family: inherit;
-        }
-
-        .btn-active { background: var(--primary); color: white; }
-        .btn-inactive { background: #e2e8f0; color: var(--text-main); }
-        .btn-inactive:hover { background: #cbd5e1; }
-
-        /* الحاويات الرئيسية */
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 30px 20px;
-            flex: 1;
-            width: 100%;
-            box-sizing: border-box;
-        }
-
-        /* قسم النموذج (إرسال المشكلة) */
-        .form-section {
-            max-width: 700px;
-            margin: 0 auto;
-            background: var(--card-bg);
-            padding: 30px;
-            border-radius: 16px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
-            border: 1px solid #e2e8f0;
-        }
-
-        .form-section h2 { margin-top: 0; color: var(--dark); font-size: 1.5rem; }
-
-        .input-group { margin-bottom: 20px; }
-        label { display: block; margin-bottom: 8px; font-weight: 700; color: var(--text-main); }
-        input[type="text"], textarea, select {
-            width: 100%; padding: 12px; border: 2px solid #e2e8f0;
-            border-radius: 10px; font-family: inherit; font-size: 1rem;
-            box-sizing: border-box; transition: 0.3s;
-        }
-        input:focus, textarea:focus, select:focus { border-color: var(--primary); outline: none; }
-
-        .radio-group { display: flex; gap: 20px; background: #f1f5f9; padding: 15px; border-radius: 10px; }
-        .radio-option { font-weight: 700; cursor: pointer; }
-
-        #solutionDiv, #imageDiv { display: none; margin-top: 15px; }
-        input[type="file"] { width: 100%; padding: 10px; background: #fff; border: 2px dashed var(--primary); border-radius: 10px; cursor: pointer; }
-
-        .btn-submit {
-            width: 100%; padding: 15px; background: var(--primary); color: white;
-            border: none; border-radius: 10px; font-size: 1.1rem; font-weight: 800;
-            cursor: pointer; transition: 0.3s; margin-top: 10px;
-        }
-        .btn-submit:hover { opacity: 0.9; transform: translateY(-2px); }
-
-        /* قسم لوحة عرض المشاكل (Grid) */
-        .board-section { display: none; }
+        .header-left { display: flex; align-items: center; gap: 15px; }
+        .header-title { font-size: 1.3rem; font-weight: 800; color: var(--primary); margin: 0; }
         
-        .board-header { text-align: center; margin-bottom: 30px; }
-        .board-header h2 { font-size: 2rem; color: var(--dark); margin: 0 0 10px 0; }
-        .board-header p { color: var(--text-muted); font-size: 1.1rem; }
+        .nav-buttons { display: flex; gap: 8px; }
+        .btn-nav {
+            padding: 10px 18px; border-radius: 10px; font-weight: 700;
+            cursor: pointer; border: none; transition: 0.3s; font-family: inherit;
+        }
+        .btn-active { background: var(--primary); color: white; }
+        .btn-inactive { background: var(--border); color: var(--text-main); }
 
-        .tickets-grid {
+        .theme-toggle {
+            background: var(--border); border: none; padding: 10px;
+            border-radius: 10px; cursor: pointer; font-size: 1.2rem;
+        }
+
+        /* شريط الإحصائيات */
+        .stats-bar {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 30px;
         }
-
-        /* تصميم البطاقة */
-        .ticket-card {
+        .stat-item {
             background: var(--card-bg);
-            border-radius: 16px;
-            padding: 20px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.03);
-            border: 1px solid #e2e8f0;
-            display: flex;
-            flex-direction: column;
-            transition: 0.3s;
+            padding: 15px;
+            border-radius: 12px;
+            text-align: center;
+            border: 1px solid var(--border);
         }
-        .ticket-card:hover { box-shadow: 0 10px 25px rgba(0,0,0,0.08); transform: translateY(-3px); }
+        .stat-value { display: block; font-size: 1.5rem; font-weight: 800; color: var(--primary); }
+        .stat-label { font-size: 0.85rem; color: var(--text-muted); }
 
-        .ticket-header { border-bottom: 1px solid #f1f5f9; padding-bottom: 10px; margin-bottom: 15px; }
-        .student-info { font-weight: 800; color: var(--primary); font-size: 1.1rem; margin-bottom: 5px; display: flex; align-items: center; gap: 8px;}
-        .grade-info { font-size: 0.9rem; color: var(--text-muted); }
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; flex: 1; width: 100%; box-sizing: border-box; }
 
-        .problem-text {
-            font-size: 1.05rem;
-            line-height: 1.6;
-            color: var(--text-main);
-            margin-bottom: 20px;
-            flex-grow: 1; /* لجعل البطاقات متساوية الطول تقريباً */
+        /* صندوق التعليمات */
+        .instructions-box {
+            background: #fffbeb; border-right: 5px solid var(--warning);
+            padding: 20px; border-radius: 12px; margin-bottom: 25px;
+        }
+        body.dark-mode .instructions-box { background: #451a03; color: #fef3c7; border-color: var(--warning); }
+        .steps-list { padding-right: 20px; line-height: 1.7; }
+        .steps-list a { color: var(--primary); font-weight: bold; }
+
+        /* أدوات البحث والفلترة */
+        .toolbar {
+            display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;
+        }
+        .search-input {
+            flex: 1; min-width: 250px; padding: 12px;
+            border: 2px solid var(--border); border-radius: 12px;
+            background: var(--card-bg); color: var(--text-main); font-family: inherit;
         }
 
-        .status-badge {
-            display: inline-block; padding: 6px 12px; border-radius: 6px; font-size: 0.85rem; font-weight: bold; margin-bottom: 15px;
+        /* قسم البطاقات */
+        .tickets-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; }
+        .ticket-card {
+            background: var(--card-bg); border-radius: 16px; padding: 20px;
+            border: 1px solid var(--border); display: flex; flex-direction: column;
         }
-        .badge-solved { background: #d1fae5; color: #059669; }
-        .badge-unsolved { background: #fee2e2; color: #dc2626; }
+        
+        /* الرد الرسمي */
+        .teacher-reply {
+            margin-top: 15px; background: rgba(2, 132, 199, 0.1);
+            border: 1px solid var(--primary); padding: 12px; border-radius: 10px;
+        }
+        .teacher-reply strong { color: var(--primary); display: block; margin-bottom: 5px; }
 
         .solution-box {
-            background: #ecfdf5; border-right: 4px solid var(--secondary);
-            padding: 15px; border-radius: 8px; font-size: 0.95rem; color: #065f46; line-height: 1.5;
+            background: rgba(16, 185, 129, 0.1); border-right: 4px solid var(--secondary);
+            padding: 15px; border-radius: 10px; margin-top: 10px;
         }
 
-        .ticket-image {
-            width: 100%; height: 200px; object-fit: cover; border-radius: 8px; border: 1px solid #e2e8f0; margin-bottom: 10px;
+        .ticket-image { width: 100%; height: 180px; object-fit: cover; border-radius: 10px; margin: 10px 0; }
+        .btn-submit {
+            width: 100%; padding: 15px; background: var(--primary); color: white;
+            border: none; border-radius: 12px; font-weight: 800; cursor: pointer;
         }
 
-        .download-link {
-            display: block; text-align: center; background: #f1f5f9; color: var(--primary);
-            padding: 8px; border-radius: 8px; text-decoration: none; font-weight: 700; font-size: 0.9rem; transition: 0.2s;
-        }
-        .download-link:hover { background: #e2e8f0; }
+        .page-footer { text-align: center; padding: 25px; color: var(--text-muted); font-weight: 700; background: var(--card-bg); border-top: 1px solid var(--border); }
 
-        .page-footer { text-align: center; padding: 20px; color: var(--text-muted); font-weight: 700; font-size: 0.95rem; background: white; border-top: 1px solid #e2e8f0; margin-top: auto; }
-
-        /* للتجاوب مع الهواتف الذكية */
-        @media (max-width: 600px) {
-            .header-title { font-size: 1.2rem; }
-            .btn-nav { padding: 6px 12px; font-size: 0.9rem; }
-            .tickets-grid { grid-template-columns: 1fr; }
+        @media (max-width: 768px) {
+            .stats-bar { grid-template-columns: 1fr; }
+            .toolbar { flex-direction: column; }
         }
     </style>
 </head>
 <body>
 
     <header>
-        <h1 class="header-title">منصة نور | الدعم الفني</h1>
+        <div class="header-left">
+            <h1 class="header-title">دعم نور التقني</h1>
+            <button class="theme-toggle" onclick="toggleDarkMode()">🌓</button>
+        </div>
         <div class="nav-buttons">
-            <button id="btnForm" class="btn-nav btn-active" onclick="switchView('form')">إرسال مشكلة</button>
-            <button id="btnBoard" class="btn-nav btn-inactive" onclick="switchView('board')">سجل الحلول</button>
+            <button id="btnForm" class="btn-nav btn-active" onclick="switchView('form')">إرسال</button>
+            <button id="btnBoard" class="btn-nav btn-inactive" onclick="switchView('board')">السجل</button>
         </div>
     </header>
 
     <div class="container">
         
-        <div id="formSection" class="form-section">
-            <h2>📝 شارك مشكلتك أو حلك</h2>
-            <form id="supportForm">
-                <div class="input-group">
-                    <label>اسم الطالب</label>
-                    <input type="text" id="name" placeholder="مثال: أحمد محمد" required>
-                </div>
-                <div class="input-group">
-                    <label>الصف الدراسي</label>
-                    <select id="grade" required>
-                        <option value="">اختر الصف...</option>
-                        <option value="الأول المتوسط">الأول المتوسط</option>
-                        <option value="الثاني المتوسط">الثاني المتوسط</option>
-                        <option value="الثالث المتوسط">الثالث المتوسط</option>
-                    </select>
-                </div>
+        <div id="formSection">
+            <div class="instructions-box">
+                <h3 style="margin-top:0">🛑 تعليمات الحل الذاتي:</h3>
+                <ol class="steps-list">
+                    <li>استخرج الإيميل الوزاري وكلمة المرور من: <a href="https://edugate.moe.gov.om" target="_blank">edugate.moe.gov.om</a></li>
+                    <li>افتح المنصة بالإيميل الرسمي (مثال: <code>rxxxx@moe.om</code>).</li>
+                    <li>استخدم متصفح <strong>FireFox</strong> لضمان أفضل توافق.</li>
+                </ol>
+            </div>
 
-                <div class="input-group">
-                    <label>وصف المشكلة</label>
-                    <textarea id="problem" rows="3" placeholder="اشرح المشكلة بوضوح..." required></textarea>
-                </div>
-
-                <div class="input-group">
-                    <label>هل تمكنت من حل المشكلة؟</label>
-                    <div class="radio-group">
-                        <label class="radio-option">
-                            <input type="radio" name="hasSolution" value="yes" onchange="toggleFields()"> نعم، وجدت حلاً
-                        </label>
-                        <label class="radio-option">
-                            <input type="radio" name="hasSolution" value="no" onchange="toggleFields()"> لا، أحتاج مساعدة
-                        </label>
+            <div style="max-width: 600px; margin: 0 auto; background: var(--card-bg); padding: 25px; border-radius: 16px; border: 1px solid var(--border);">
+                <form id="supportForm">
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px; margin-bottom:15px;">
+                        <div>
+                            <label>الاسم</label>
+                            <input type="text" id="name" required placeholder="الاسم الثنائي">
+                        </div>
+                        <div>
+                            <label>الصف</label>
+                            <select id="grade" required>
+                                <option value="الأول المتوسط">الأول المتوسط</option>
+                                <option value="الثاني المتوسط">الثاني المتوسط</option>
+                                <option value="الثالث المتوسط">الثالث المتوسط</option>
+                            </select>
+                        </div>
                     </div>
-                </div>
-
-                <div class="input-group" id="solutionDiv">
-                    <label>ما هو الحل؟</label>
-                    <textarea id="solution" rows="3" placeholder="الخطوات التي قمت بها لحل المشكلة..."></textarea>
-                </div>
-
-                <div class="input-group" id="imageDiv">
-                    <label>صورة توضح المشكلة (اختياري)</label>
-                    <input type="file" id="imageInput" accept="image/*">
-                </div>
-
-                <button type="submit" class="btn-submit" id="submitBtn">إرسال التقرير 🚀</button>
-            </form>
-        </div>
-
-        <div id="boardSection" class="board-section">
-            <div class="board-header">
-                <h2>💡 بنك المشاكل والحلول</h2>
-                <p>تصفح مشاكل زملائك واستفد من الحلول المطروحة</p>
-            </div>
-            
-            <div id="ticketsContainer" class="tickets-grid">
-                <div style="text-align: center; grid-column: 1 / -1; padding: 40px; color: #94a3b8;">
-                    جاري تحميل البيانات... ⏳
-                </div>
+                    <div style="margin-bottom:15px;">
+                        <label>وصف المشكلة</label>
+                        <textarea id="problem" rows="3" required placeholder="ما الذي يظهر لك؟"></textarea>
+                    </div>
+                    <div style="margin-bottom:15px;">
+                        <label>هل وجدت حلاً؟</label>
+                        <select id="hasSolution" onchange="toggleFields()" style="width:100%">
+                            <option value="no">لا، أحتاج مساعدة</option>
+                            <option value="yes">نعم، لدي حل للمشاركة</option>
+                        </select>
+                    </div>
+                    <div id="solutionDiv" style="display:none; margin-bottom:15px;">
+                        <label>الحل المقترح</label>
+                        <textarea id="solution" rows="3"></textarea>
+                    </div>
+                    <div id="imageDiv" style="margin-bottom:15px;">
+                        <label>إرفاق صورة (Screenshot)</label>
+                        <input type="file" id="imageInput" accept="image/*">
+                    </div>
+                    <button type="submit" class="btn-submit" id="submitBtn">إرسال التقرير 🚀</button>
+                </form>
             </div>
         </div>
 
+        <div id="boardSection" style="display:none">
+            <div class="stats-bar">
+                <div class="stat-item"><span class="stat-value" id="totalTickets">0</span><span class="stat-label">إجمالي البلاغات</span></div>
+                <div class="stat-item"><span class="stat-value" id="solvedCount">0</span><span class="stat-label">مشاكل تم حلها</span></div>
+                <div class="stat-item"><span class="stat-value" id="pendingCount">0</span><span class="stat-label">قيد المتابعة</span></div>
+            </div>
+
+            <div class="toolbar">
+                <input type="text" class="search-input" id="searchInput" placeholder="ابحث باسم الطالب أو نوع المشكلة..." oninput="filterTickets()">
+                <select id="filterStatus" class="btn-nav btn-inactive" onchange="filterTickets()" style="border: 2px solid var(--border)">
+                    <option value="all">كل الحالات</option>
+                    <option value="solved">تم الحل</option>
+                    <option value="pending">بانتظار الحل</option>
+                </select>
+            </div>
+
+            <div id="ticketsContainer" class="tickets-grid"></div>
+        </div>
     </div>
 
-    <div class="page-footer">
-        إعداد معلمي تقنية المعلومات بمدرسة محمد بن سليمان الغافري
-    </div>
+    <footer class="page-footer">إعداد معلمي تقنية المعلومات بمدرسة محمد بن سليمان الغافري</footer>
 
     <script>
-        // ======= ضع الرابط الخاص بك هنا =======
-        const scriptURL = 'https://script.google.com/macros/s/AKfycbx1NIaG8unOjEm0ME8ruoI3bR3uWJDTFOVLr6l42jzirzw-oXG_cb6Sq-4F3E0UjFDK/exec';
-        // =====================================
-
-        let base64Image = "";
+        const scriptURL = 'https://script.google.com/macros/s/AKfycbwUUfpkHftyi6e7GL6m5cECLurCLhfozkfrMxTSpBNaqLZRhdrhDnnwCyBz0yQ-d-dy/exec'; // ضع رابطك هنا
         let feedbackData = [];
+        let base64Image = "";
 
-        // التبديل بين صفحة الإرسال وصفحة العرض
+        function toggleDarkMode() {
+            document.body.classList.toggle('dark-mode');
+            localStorage.setItem('darkMode', document.body.classList.contains('dark-mode'));
+        }
+
+        if (localStorage.getItem('darkMode') === 'true') document.body.classList.add('dark-mode');
+
         function switchView(view) {
-            const formSection = document.getElementById('formSection');
-            const boardSection = document.getElementById('boardSection');
-            const btnForm = document.getElementById('btnForm');
-            const btnBoard = document.getElementById('btnBoard');
-
-            if (view === 'board') {
-                formSection.style.display = 'none';
-                boardSection.style.display = 'block';
-                btnForm.className = 'btn-nav btn-inactive';
-                btnBoard.className = 'btn-nav btn-active';
-                fetchAndRenderTickets(); // تحديث البيانات عند فتح اللوحة
-            } else {
-                formSection.style.display = 'block';
-                boardSection.style.display = 'none';
-                btnForm.className = 'btn-nav btn-active';
-                btnBoard.className = 'btn-nav btn-inactive';
-            }
+            document.getElementById('formSection').style.display = view === 'form' ? 'block' : 'none';
+            document.getElementById('boardSection').style.display = view === 'board' ? 'block' : 'none';
+            document.getElementById('btnForm').className = `btn-nav ${view === 'form' ? 'btn-active' : 'btn-inactive'}`;
+            document.getElementById('btnBoard').className = `btn-nav ${view === 'board' ? 'btn-active' : 'btn-inactive'}`;
+            if(view === 'board') fetchTickets();
         }
 
-        // إظهار وإخفاء الحقول
         function toggleFields() {
-            const hasSolution = document.querySelector('input[name="hasSolution"]:checked');
-            document.getElementById('solutionDiv').style.display = (hasSolution.value === 'yes') ? 'block' : 'none';
-            document.getElementById('imageDiv').style.display = (hasSolution.value === 'no') ? 'block' : 'none';
+            const val = document.getElementById('hasSolution').value;
+            document.getElementById('solutionDiv').style.display = val === 'yes' ? 'block' : 'none';
         }
 
-        // تحويل الصورة 
         document.getElementById('imageInput').addEventListener('change', function(e) {
             const file = e.target.files[0];
             if(file) {
                 const reader = new FileReader();
-                reader.onloadend = function() { base64Image = reader.result; }
+                reader.onloadend = () => base64Image = reader.result;
                 reader.readAsDataURL(file);
             }
         });
 
-        // إرسال البيانات
         document.getElementById('supportForm').addEventListener('submit', e => {
             e.preventDefault();
-            
-            const hasSolution = document.querySelector('input[name="hasSolution"]:checked');
-            if(!hasSolution) { alert("حدد أولاً هل وجدت حلاً أم لا."); return; }
-
-            const submitBtn = document.getElementById('submitBtn');
-            submitBtn.innerText = 'جاري الإرسال... ⏳';
-            submitBtn.disabled = true;
+            const btn = document.getElementById('submitBtn');
+            btn.innerText = 'جاري الإرسال...';
+            btn.disabled = true;
 
             const payload = new URLSearchParams();
             payload.append('name', document.getElementById('name').value);
             payload.append('grade', document.getElementById('grade').value);
             payload.append('problem', document.getElementById('problem').value);
-            payload.append('hasSolution', hasSolution.value === 'yes' ? 'تم الحل' : 'بانتظار الحل');
-            
-            if(hasSolution.value === 'yes') {
-                payload.append('solution', document.getElementById('solution').value);
-                payload.append('image', '');
-            } else {
-                payload.append('solution', '');
-                payload.append('image', base64Image);
-            }
+            payload.append('hasSolution', document.getElementById('hasSolution').value === 'yes' ? 'تم الحل' : 'بانتظار الحل');
+            payload.append('solution', document.getElementById('solution').value);
+            payload.append('image', base64Image);
 
             fetch(scriptURL, { method: 'POST', body: payload })
-                .then(res => res.json())
-                .then(data => {
-                    alert('تم استلام تقريرك بنجاح!');
+                .then(() => {
+                    alert('تم الإرسال بنجاح!');
                     document.getElementById('supportForm').reset();
-                    base64Image = "";
-                    document.getElementById('solutionDiv').style.display = 'none';
-                    document.getElementById('imageDiv').style.display = 'none';
-                    submitBtn.innerText = 'إرسال التقرير 🚀';
-                    submitBtn.disabled = false;
-                    
-                    // الانتقال التلقائي للوحة العرض بعد الإرسال
-                    switchView('board'); 
-                })
-                .catch(err => {
-                    alert('حدث خطأ، تأكد من الاتصال وجرب مرة أخرى.');
-                    submitBtn.innerText = 'إرسال التقرير 🚀';
-                    submitBtn.disabled = false;
-                });
+                    switchView('board');
+                    btn.innerText = 'إرسال التقرير 🚀';
+                    btn.disabled = false;
+                }).catch(() => alert('خطأ في الإرسال'));
         });
 
-        // جلب البيانات وعرضها في شكل بطاقات (Cards)
-        function fetchAndRenderTickets() {
-            const container = document.getElementById('ticketsContainer');
-            container.innerHTML = '<div style="text-align: center; grid-column: 1 / -1; padding: 40px; color: #94a3b8;">جاري المزامنة... ⏳</div>';
-
-            fetch(scriptURL)
-                .then(res => res.json())
-                .then(data => {
-                    if(data.length === 0) {
-                        container.innerHTML = '<div style="text-align: center; grid-column: 1 / -1; padding: 40px; color: #94a3b8;">لا توجد مشاكل مسجلة بعد.</div>';
-                        return;
-                    }
-
-                    container.innerHTML = '';
-                    data.reverse().forEach(item => {
-                        const isSolved = item.hasSolution === 'تم الحل';
-                        const badgeHtml = isSolved 
-                            ? `<span class="status-badge badge-solved">✅ تم الحل</span>`
-                            : `<span class="status-badge badge-unsolved">⚠️ بانتظار مساعدة</span>`;
-
-                        const contentHtml = isSolved
-                            ? `<div class="solution-box"><strong>💡 الحل:</strong><br>${item.solution}</div>`
-                            : (item.imageUrl 
-                                ? `<img src="${item.imageUrl}" class="ticket-image" alt="صورة المشكلة" loading="lazy">
-                                   <a href="${item.imageUrl}" target="_blank" class="download-link">⬇️ عرض وتنزيل الصورة</a>` 
-                                : `<div style="color: #cbd5e1; font-size: 0.9rem; text-align: center; padding: 20px; border: 1px dashed #cbd5e1; border-radius: 8px;">لم يرفق صورة</div>`);
-
-                        const card = document.createElement('div');
-                        card.className = 'ticket-card';
-                        card.innerHTML = `
-                            <div class="ticket-header">
-                                ${badgeHtml}
-                                <div class="student-info">👤 ${item.name}</div>
-                                <div class="grade-info">🏫 الصف: ${item.grade}</div>
-                            </div>
-                            <div class="problem-text">${item.problem}</div>
-                            ${contentHtml}
-                        `;
-                        container.appendChild(card);
-                    });
-                })
-                .catch(err => {
-                    container.innerHTML = '<div style="text-align: center; grid-column: 1 / -1; padding: 40px; color: red;">⚠️ تعذر الاتصال بالخادم.</div>';
-                });
+        function fetchTickets() {
+            fetch(scriptURL).then(res => res.json()).then(data => {
+                feedbackData = data;
+                updateStats();
+                renderTickets(data);
+            });
         }
 
-        // تحميل البيانات الأولية في الخلفية
-        fetchAndRenderTickets();
+        function updateStats() {
+            document.getElementById('totalTickets').innerText = feedbackData.length;
+            document.getElementById('solvedCount').innerText = feedbackData.filter(t => t.hasSolution === 'تم الحل').length;
+            document.getElementById('pendingCount').innerText = feedbackData.filter(t => t.hasSolution !== 'تم الحل').length;
+        }
+
+        function renderTickets(data) {
+            const container = document.getElementById('ticketsContainer');
+            container.innerHTML = data.reverse().map(item => `
+                <div class="ticket-card">
+                    <span class="status-badge ${item.hasSolution === 'تم الحل' ? 'badge-solved' : 'badge-unsolved'}">
+                        ${item.hasSolution === 'تم الحل' ? '✅ تم الحل' : '⏳ بانتظار الحل'}
+                    </span>
+                    <div style="font-weight:800; color:var(--primary)">👤 ${item.name}</div>
+                    <div style="font-size:0.8rem; margin-bottom:10px">📅 ${item.grade}</div>
+                    <div style="margin-bottom:10px"><strong>المشكلة:</strong> ${item.problem}</div>
+                    ${item.imageUrl ? `<img src="${item.imageUrl}" class="ticket-image">` : ''}
+                    ${item.solution ? `<div class="solution-box"><strong>💡 الحل المقترح:</strong><br>${item.solution}</div>` : ''}
+                </div>
+            `).join('');
+        }
+
+        function filterTickets() {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            const status = document.getElementById('filterStatus').value;
+            const filtered = feedbackData.filter(t => {
+                const matchesSearch = t.name.toLowerCase().includes(query) || t.problem.toLowerCase().includes(query);
+                const matchesStatus = status === 'all' || (status === 'solved' && t.hasSolution === 'تم الحل') || (status === 'pending' && t.hasSolution !== 'تم الحل');
+                return matchesSearch && matchesStatus;
+            });
+            renderTickets(filtered);
+        }
     </script>
 </body>
 </html>
