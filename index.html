@@ -27,14 +27,38 @@
 
         body { font-family: 'Tajawal', sans-serif; background: var(--light-bg); margin: 0; padding: 0; color: var(--text-main); transition: 0.3s; display: flex; flex-direction: column; min-height: 100vh; }
 
-        header { background: var(--card-bg); box-shadow: 0 4px 15px rgba(0,0,0,0.05); padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 1000; border-bottom: 1px solid var(--border); }
-        .header-left { display: flex; align-items: center; gap: 15px; }
-        .header-title { font-size: 1.4rem; font-weight: 800; color: var(--primary); margin: 0; }
-        .nav-buttons { display: flex; gap: 10px; }
+        /* شريط التنقل العلوي المحدث (العنوان فوق الأزرار) */
+        header { 
+            background: var(--card-bg); 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05); 
+            padding: 20px; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            gap: 15px; 
+            position: sticky; 
+            top: 0; 
+            z-index: 1000; 
+            border-bottom: 1px solid var(--border); 
+        }
+        .header-top { display: flex; align-items: center; justify-content: center; width: 100%; max-width: 1000px; position: relative; }
+        .header-title { font-size: 1.6rem; font-weight: 800; color: var(--primary); margin: 0; text-align: center; }
+        
+        .theme-toggle { background: var(--border); border: none; padding: 10px 15px; border-radius: 10px; cursor: pointer; font-size: 1.2rem; transition: 0.3s; position: absolute; left: 10px; }
+        .theme-toggle:hover { transform: scale(1.05); }
+        
+        .nav-buttons { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
         .btn-nav { padding: 10px 20px; border-radius: 10px; font-weight: 700; font-size: 1rem; cursor: pointer; border: none; transition: 0.3s; font-family: inherit; }
         .btn-active { background: var(--primary); color: white; }
         .btn-inactive { background: var(--border); color: var(--text-main); }
-        .theme-toggle { background: var(--border); border: none; padding: 10px 15px; border-radius: 10px; cursor: pointer; font-size: 1.2rem; transition: 0.3s; }
+        
+        /* أدوات ونوافذ الإدارة */
+        .btn-admin { background: #475569; color: white; display: flex; align-items: center; gap: 5px; }
+        .btn-action { padding: 10px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; color: white; font-family: inherit; transition: 0.2s;}
+        .admin-tools { margin-top: 15px; padding-top: 15px; border-top: 1px dashed var(--border); display: flex; gap: 10px; }
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: none; justify-content: center; align-items: center; z-index: 2000; backdrop-filter: blur(5px); }
+        .modal-content { background: var(--card-bg); padding: 30px; border-radius: 16px; width: 90%; max-width: 400px; box-shadow: 0 20px 40px rgba(0,0,0,0.2); }
+        .modal-title { margin-top: 0; color: var(--primary); margin-bottom: 10px; }
 
         .container { max-width: 1000px; margin: 0 auto; padding: 30px 20px; flex: 1; width: 100%; box-sizing: border-box; }
 
@@ -52,7 +76,7 @@
         .row { display: flex; gap: 20px; }
         .input-group { margin-bottom: 20px; flex: 1; }
         label { display: block; margin-bottom: 8px; font-weight: 700; color: var(--text-main); font-size: 1.05rem;}
-        input[type="text"], textarea, select, input[type="file"] { width: 100%; padding: 15px; border: 2px solid var(--border); border-radius: 10px; font-family: inherit; font-size: 1rem; box-sizing: border-box; transition: all 0.3s; background: var(--input-bg); color: var(--text-main); }
+        input[type="text"], input[type="password"], textarea, select, input[type="file"] { width: 100%; padding: 15px; border: 2px solid var(--border); border-radius: 10px; font-family: inherit; font-size: 1rem; box-sizing: border-box; transition: all 0.3s; background: var(--input-bg); color: var(--text-main); }
         input:focus, textarea:focus, select:focus { border-color: var(--primary); outline: none; box-shadow: 0 0 0 4px rgba(2, 132, 199, 0.1); }
 
         .btn-submit { width: 100%; padding: 16px; background: var(--primary); color: white; border: none; border-radius: 10px; font-size: 1.2rem; font-weight: 800; cursor: pointer; transition: 0.3s; margin-top: 10px; }
@@ -94,13 +118,14 @@
 <body>
 
     <header>
-        <div class="header-left">
+        <div class="header-top">
             <h1 class="header-title">دعم منصة نور</h1>
             <button class="theme-toggle" onclick="toggleDarkMode()" title="تغيير المظهر">🌓</button>
         </div>
         <div class="nav-buttons">
             <button id="btnForm" class="btn-nav btn-active" onclick="switchView('form')">إرسال تقرير</button>
             <button id="btnBoard" class="btn-nav btn-inactive" onclick="switchView('board')">سجل الحلول</button>
+            <button id="btnAdmin" class="btn-nav btn-admin" onclick="openLoginModal()">⚙️ الإدارة</button>
         </div>
     </header>
 
@@ -198,36 +223,53 @@
 
     <footer class="page-footer">إعداد معلمي تقنية المعلومات بمدرسة محمد بن سليمان الغافري</footer>
 
+    <div id="loginModal" class="modal-overlay">
+        <div class="modal-content">
+            <h3 class="modal-title">🔒 تسجيل دخول المعلم</h3>
+            <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 15px;">أدخل كلمة المرور لتفعيل خيارات التحكم والحذف.</p>
+            <input type="password" id="adminPassword" placeholder="كلمة المرور..." style="margin-bottom: 15px;">
+            <div style="display: flex; gap: 10px;">
+                <button class="btn-action" style="flex: 1; background: var(--primary);" id="loginBtn" onclick="verifyAdmin()">تسجيل الدخول</button>
+                <button class="btn-action" style="flex: 1; background: var(--text-muted);" onclick="closeModals()">إلغاء</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="replyModal" class="modal-overlay">
+        <div class="modal-content">
+            <h3 class="modal-title">✅ اعتماد حل المشكلة</h3>
+            <textarea id="adminReplyText" rows="4" placeholder="اكتب الحل هنا ليظهر للطلاب..." style="margin-bottom: 15px;"></textarea>
+            <input type="hidden" id="currentTicketId">
+            <div style="display: flex; gap: 10px;">
+                <button class="btn-action" style="flex: 1; background: var(--secondary);" id="replyBtn" onclick="submitAdminReply()">نشر الحل</button>
+                <button class="btn-action" style="flex: 1; background: var(--text-muted);" onclick="closeModals()">إلغاء</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         // ======= 🔴 ضع الرابط الجديد الخاص بك هنا 🔴 =======
+        // تذكير: يجب أن يكون رابطاً جديداً بعد وضع كود Apps Script الذي يدعم (الإدارة والحذف)
         const scriptURL = 'https://script.google.com/macros/s/AKfycbykL7Fp1-9lRY8eHGUM6eZnWgZufGgmRJwt_yGhWd7WQSXYQAS1_WgvzkMmWKRZGs-Y/exec'; 
         // ===================================================
         
         let feedbackData = [];
         let base64ImagesArray = []; 
+        let isAdmin = false; // تفعيل حالة الإدارة
 
-        // ----- كود الصفوف والشعب الجديد -----
+        // ----- كود الصفوف والشعب -----
         const gradesData = {
-            "الخامس": 6,
-            "السادس": 5,
-            "السابع": 4,
-            "الثامن": 4,
-            "التاسع": 4,
-            "العاشر": 4
+            "الخامس": 6, "السادس": 5, "السابع": 4, "الثامن": 4, "التاسع": 4, "العاشر": 4
         };
 
         function updateSectionDropdown() {
             const mainGrade = document.getElementById('mainGrade').value;
             const sectionDropdown = document.getElementById('sectionGrade');
-            
-            // تفريغ قائمة الشعب أولاً
             sectionDropdown.innerHTML = '<option value="">اختر الشعبة...</option>';
             
             if (mainGrade && gradesData[mainGrade]) {
                 sectionDropdown.disabled = false;
                 const sectionsCount = gradesData[mainGrade];
-                
-                // إضافة الشعب حسب العدد المحدد لكل صف
                 for (let i = 1; i <= sectionsCount; i++) {
                     const option = document.createElement('option');
                     option.value = i;
@@ -239,7 +281,6 @@
                 sectionDropdown.innerHTML = '<option value="">اختر الصف أولاً...</option>';
             }
         }
-        // -------------------------------------
 
         function toggleDarkMode() {
             document.body.classList.toggle('dark-mode');
@@ -304,10 +345,10 @@
             btn.innerText = 'جاري المعالجة وإرسال البيانات... ⏳';
             btn.disabled = true;
 
-            // دمج الصف والشعبة في حقل واحد قبل الإرسال لجوجل شيت
             const fullGrade = `${document.getElementById('mainGrade').value} / شعبة ${document.getElementById('sectionGrade').value}`;
 
             const payload = new URLSearchParams();
+            payload.append('action', 'add'); // تحديد نوع العملية لجوجل شيت
             payload.append('name', document.getElementById('name').value);
             payload.append('grade', fullGrade);
             payload.append('problem', document.getElementById('problem').value);
@@ -330,11 +371,11 @@
                     if(msgDiv) msgDiv.style.display = 'none';
                     toggleFields();
                     switchView('board');
-                    btn.innerText = 'إرسال التقرير ';
+                    btn.innerText = 'إرسال التقرير 🚀';
                     btn.disabled = false;
                 }).catch(() => {
                     alert('حدث خطأ في الاتصال، يرجى المحاولة لاحقاً.');
-                    btn.innerText = 'إرسال التقرير ';
+                    btn.innerText = 'إرسال التقرير 🚀';
                     btn.disabled = false;
                 });
         });
@@ -379,18 +420,29 @@
                     imagesGalleryHtml += '</div>';
                 }
 
+                // عرض أزرار الإدارة إذا كان المعلم قد سجل دخوله
+                let adminHtml = '';
+                if (isAdmin) {
+                    adminHtml = `
+                    <div class="admin-tools">
+                        <button onclick="openReplyModal('${item.id}')" class="btn-action" style="flex:1; background: var(--secondary);">✅ حل المشكلة</button>
+                        <button onclick="deleteTicket('${item.id}')" class="btn-action" style="flex:1; background: var(--danger);">🗑️ حذف البلاغ</button>
+                    </div>`;
+                }
+
                 return `
                 <div class="ticket-card">
                     <span class="status-badge ${item.hasSolution === 'تم الحل' ? 'badge-solved' : 'badge-unsolved'}">
                         ${item.hasSolution === 'تم الحل' ? '✅ تم الحل' : '⏳ بانتظار الحل'}
                     </span>
                     <div style="font-weight:800; color:var(--primary); font-size: 1.1rem;">👤 ${item.name}</div>
-                    <div style="font-size:0.9rem; color:var(--text-muted); margin-bottom:15px"> ${item.grade}</div>
+                    <div style="font-size:0.9rem; color:var(--text-muted); margin-bottom:15px">🏫 ${item.grade}</div>
                     <div style="margin-bottom:10px; flex-grow: 1; line-height: 1.6;"><strong>المشكلة:</strong> ${item.problem}</div>
                     
-                    ${item.solution ? `<div class="solution-box"><strong>حل الطالب:</strong><br>${item.solution}</div>` : ''}
+                    ${item.solution ? `<div class="solution-box"><strong>💡 الحل:</strong><br>${item.solution}</div>` : ''}
                     
                     ${imagesGalleryHtml}
+                    ${adminHtml}
                 </div>
                 `;
             }).join('');
@@ -405,6 +457,64 @@
                 return matchesSearch && matchesStatus;
             });
             renderTickets(filtered);
+        }
+
+        // ================= وظائف لوحة الإدارة ================= //
+        function openLoginModal() { document.getElementById('loginModal').style.display = 'flex'; }
+        function closeModals() { document.getElementById('loginModal').style.display = 'none'; document.getElementById('replyModal').style.display = 'none'; }
+
+        function verifyAdmin() {
+            const pwd = document.getElementById('adminPassword').value;
+            const btn = document.getElementById('loginBtn');
+            btn.innerText = 'جاري التحقق...';
+            
+            fetch(`${scriptURL}?action=verify&password=${pwd}`)
+                .then(res => res.json())
+                .then(data => {
+                    if(data.status === 'success') {
+                        isAdmin = true;
+                        document.getElementById('btnAdmin').innerHTML = '✅ وضع الإدارة مفعل';
+                        document.getElementById('btnAdmin').style.background = 'var(--secondary)';
+                        closeModals();
+                        switchView('board'); 
+                        alert('أهلاً بك أستاذي! تم تفعيل أدوات التحكم والحذف.');
+                    } else { alert('كلمة المرور غير صحيحة!'); }
+                }).finally(() => btn.innerText = 'تسجيل الدخول');
+        }
+
+        function openReplyModal(id) {
+            document.getElementById('currentTicketId').value = id;
+            document.getElementById('replyModal').style.display = 'flex';
+        }
+
+        function submitAdminReply() {
+            const id = document.getElementById('currentTicketId').value;
+            const solutionText = document.getElementById('adminReplyText').value;
+            const btn = document.getElementById('replyBtn');
+            
+            if(!solutionText) { alert("الرجاء كتابة الحل أولاً!"); return; }
+
+            btn.innerText = 'جاري التحديث...';
+            const payload = new URLSearchParams({ action: 'update', id: id, solution: solutionText });
+            
+            fetch(scriptURL, { method: 'POST', body: payload })
+                .then(() => {
+                    alert('تم إضافة الحل واعتماده بنجاح!');
+                    closeModals();
+                    document.getElementById('adminReplyText').value = '';
+                    fetchTickets();
+                }).finally(() => btn.innerText = 'نشر الحل');
+        }
+
+        function deleteTicket(id) {
+            if(!confirm('هل أنت متأكد من رغبتك بحذف هذا التقرير نهائياً من قاعدة البيانات؟')) return;
+            
+            const payload = new URLSearchParams({ action: 'delete', id: id });
+            fetch(scriptURL, { method: 'POST', body: payload })
+                .then(() => {
+                    alert('تم الحذف بنجاح!');
+                    fetchTickets(); 
+                });
         }
     </script>
 </body>
